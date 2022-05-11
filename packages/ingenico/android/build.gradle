@@ -19,7 +19,7 @@ rootProject.allprojects {
         google()
         jcenter()
         maven {
-            url '/Users/jvenin/Desktop/dev/sdk-client-android/onlinepayments-sdk/build/repo'
+            url '/Users/ahmedhachemi/Desktop/ragnarok4/ragnarok/repo'
         }
     }
 }
