@@ -10,15 +10,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  pigeon: ^3.0.3
   ingenico_platform_interface:
     git:
-      url: git://github.com/bamlab/ingenico-flutter-sdk.git
+      url: https://github.com/bamlab/ingenico-flutter-sdk.git
       path: packages/ingenico_platform_interface
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  pigeon: ^1.0.6
 
 flutter:
   plugin:

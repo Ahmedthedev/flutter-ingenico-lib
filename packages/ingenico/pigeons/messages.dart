@@ -44,7 +44,7 @@ class BasicPaymentProduct {
   late bool? allowsTokenization;
   late bool? usesRedirectionTo3rdParty;
 
-  late DisplayHintsPaymentItem displayHints;
+  late DisplayHintsPaymentItem? displayHints;
 }
 
 class DisplayHintsPaymentItem {
@@ -63,7 +63,7 @@ class PaymentProduct {
   late bool? allowsRecurring;
   late bool? allowsTokenization;
   late bool? usesRedirectionTo3rdParty;
-  late DisplayHintsPaymentItem displayHints;
+  late DisplayHintsPaymentItem? displayHints;
   late List<PaymentProductField?> fields;
 }
 
@@ -74,10 +74,10 @@ class PaymentProductField {
   late Type type;
 
   // Contains hints for rendering this field
-  late DisplayHintsProductFields displayHints;
+  late DisplayHintsProductFields? displayHints;
 
   // Contains contraints for this field
-  late DataRestrictions dataRestrictions;
+  late DataRestrictions? dataRestrictions;
 }
 
 enum Type {
@@ -193,12 +193,6 @@ abstract class Api {
 
   // For proper object generation
   // ignore: unused_element
-  void _passThrough(
-      PaymentProductField a,
-      BasicPaymentProduct b,
-      AbstractValidationRule c,
-      ValueMap d,
-      PaymentProductFieldDisplayElement e);
 
   @async
   PaymentContextResponse getBasicPaymentItems(PaymentContextRequest request);

@@ -1,40 +1,30 @@
 package com.ingenico.flutter_sdk
-
 import android.content.Context
 import androidx.annotation.NonNull
-import com.ingenico.direct.sdk.client.android.asynctask.BasicPaymentItemsAsyncTask.BasicPaymentItemsCallListener
-import com.ingenico.direct.sdk.client.android.asynctask.PaymentProductAsyncTask
-import com.ingenico.direct.sdk.client.android.communicate.C2sCommunicatorConfiguration
-import com.ingenico.direct.sdk.client.android.model.*
-import com.ingenico.direct.sdk.client.android.model.api.ErrorResponse
-import com.ingenico.direct.sdk.client.android.model.paymentproduct.*
-import com.ingenico.direct.sdk.client.android.model.paymentproduct.displayhints.DisplayHintsPaymentItem
-import com.ingenico.direct.sdk.client.android.model.validation.ValidationRule
-import com.ingenico.direct.sdk.client.android.session.Session
-import com.ingenico.direct.sdk.client.android.session.SessionEncryptionHelper.OnPaymentRequestPreparedListener
+import com.onlinepayments.sdk.client.android.asynctask.BasicPaymentItemsAsyncTask.BasicPaymentItemsCallListener
+import com.onlinepayments.sdk.client.android.asynctask.PaymentProductAsyncTask
+import com.onlinepayments.sdk.client.android.communicate.C2sCommunicatorConfiguration
+import com.onlinepayments.sdk.client.android.model.*
+import com.onlinepayments.sdk.client.android.model.api.ErrorResponse
+import com.onlinepayments.sdk.client.android.model.paymentproduct.*
+import com.onlinepayments.sdk.client.android.model.paymentproduct.displayhints.DisplayHintsPaymentItem
+import com.onlinepayments.sdk.client.android.model.validation.ValidationRule
+import com.onlinepayments.sdk.client.android.session.Session
+import com.onlinepayments.sdk.client.android.session.SessionEncryptionHelper.OnPaymentRequestPreparedListener
 import io.flutter.embedding.engine.plugins.FlutterPlugin
-
-
 /** IngenicoSdkPlugin */
 class IngenicoSdkPlugin : FlutterPlugin, Messages.Api {
-
-    private val sessionsMap: HashMap<String, Session> = HashMap()
-    private val paymentProductMap: HashMap<String, PaymentProduct> =
+     val sessionsMap: HashMap<String, Session> = HashMap()
+     val paymentProductMap: HashMap<String, PaymentProduct> =
         HashMap()
-
-    private var context: Context? = null
-
-
+     var context: Context? = null
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         Messages.Api.setup(flutterPluginBinding.binaryMessenger, this)
         context = flutterPluginBinding.applicationContext
     }
-
-
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         Messages.Api.setup(binding.binaryMessenger, null)
     }
-
     override fun createClientSession(arg: Messages.SessionRequest): Messages.SessionResponse {
         val session: Session = C2sCommunicatorConfiguration.initWithClientSessionId(
             arg.clientSessionId,
@@ -44,56 +34,39 @@ class IngenicoSdkPlugin : FlutterPlugin, Messages.Api {
             arg.environmentIsProduction,
             arg.applicationIdentifier
         )
-
-        val messageSession = Messages.SessionResponse()
-        messageSession.sessionId = session.clientSessionId
-
-        sessionsMap[messageSession.sessionId] = session
-
-        return messageSession
-    }
-
-    override fun _passThrough(
-        a: Messages.PaymentProductField?,
-        b: Messages.BasicPaymentProduct?,
-        c: Messages.AbstractValidationRule?,
-        d: Messages.ValueMap?,
-        e: Messages.PaymentProductFieldDisplayElement?
-    ) {
+        val messageSession = Messages.SessionResponse.Builder()
+        messageSession.setSessionId(session.clientSessionId)
+        val builtSession = messageSession.build()
+        sessionsMap[builtSession.getSessionId()] = session
+        return builtSession
     }
 
     private fun mapDisplayHints(displayHints: DisplayHintsPaymentItem): Messages.DisplayHintsPaymentItem {
-        var mapped = Messages.DisplayHintsPaymentItem()
-        mapped.displayOrder = displayHints.displayOrder.toLong()
-        mapped.label = displayHints.label
-        mapped.logoUrl = displayHints.logoUrl
-        return mapped
+        var mapped = Messages.DisplayHintsPaymentItem.Builder()
+        mapped.setDisplayOrder(displayHints.displayOrder.toLong())
+        mapped.setLabel(displayHints.label)
+        mapped.setLogoUrl(displayHints.logoUrl)
+        return mapped.build()
     }
-
     private fun mapBasicPaymentProduct(basicPaymentProduct: BasicPaymentProduct): Messages.BasicPaymentProduct {
-        var mapped = Messages.BasicPaymentProduct()
-        mapped.allowsRecurring = basicPaymentProduct.allowsRecurring()
-        mapped.allowsTokenization = basicPaymentProduct.allowsTokenization()
-        mapped.displayHints = mapDisplayHints(basicPaymentProduct.displayHints)
-        mapped.id = basicPaymentProduct.id
-        mapped.maxAmount = basicPaymentProduct.maxAmount.toDouble()
-        mapped.minAmount = basicPaymentProduct.minAmount.toDouble()
-        mapped.paymentMethod = basicPaymentProduct.paymentMethod
-        mapped.paymentProductGroup = basicPaymentProduct.paymentProductGroup
-        mapped.usesRedirectionTo3rdParty = basicPaymentProduct.usesRedirectionTo3rdParty()
-
-        return mapped;
+        var mapped = Messages.BasicPaymentProduct.Builder()
+        mapped.setAllowsRecurring(basicPaymentProduct.allowsRecurring())
+        mapped.setAllowsTokenization(basicPaymentProduct.allowsTokenization())
+        mapped.setDisplayHints(mapDisplayHints(basicPaymentProduct.displayHints))
+        mapped.setId(basicPaymentProduct.id)
+        mapped.setMaxAmount(basicPaymentProduct.maxAmount.toDouble())
+        mapped.setMinAmount(basicPaymentProduct.minAmount.toDouble())
+        mapped.setPaymentMethod(basicPaymentProduct.paymentMethod)
+        mapped.setPaymentProductGroup(basicPaymentProduct.paymentProductGroup)
+        mapped.setUsesRedirectionTo3rdParty(basicPaymentProduct.usesRedirectionTo3rdParty())
+        return mapped.build();
     }
-
     private fun mapBasicPaymentItem(basicPaymentProduct: BasicPaymentItem): Messages.BasicPaymentProduct {
-        var mapped = Messages.BasicPaymentProduct()
-        mapped.displayHints = mapDisplayHints(basicPaymentProduct.displayHints)
-        mapped.id = basicPaymentProduct.id
-
-        return mapped;
+        var mapped = Messages.BasicPaymentProduct.Builder()
+        mapped.setDisplayHints(mapDisplayHints(basicPaymentProduct.displayHints))
+        mapped.setId(basicPaymentProduct.id)
+        return mapped.build();
     }
-
-
     private fun mapType(basicPaymentProduct: PaymentProductField.Type): Messages.Type {
         return when (basicPaymentProduct) {
             PaymentProductField.Type.STRING -> Messages.Type.string
@@ -104,19 +77,12 @@ class IngenicoSdkPlugin : FlutterPlugin, Messages.Api {
             PaymentProductField.Type.DATE -> Messages.Type.date
         }
     }
-
-
-
     private fun mapPaymentProductField(paymentProductField: PaymentProductField): Messages.PaymentProductField {
-        var mapped = Messages.PaymentProductField()
-        mapped.id = paymentProductField.id
-        mapped.type = mapType(paymentProductField.type)
-
-        return mapped;
+        var mapped = Messages.PaymentProductField.Builder()
+        mapped.setId(paymentProductField.id)
+        mapped.setType(mapType(paymentProductField.type))
+        return mapped.build();
     }
-
-
-
     override fun getBasicPaymentItems(
         arg: Messages.PaymentContextRequest,
         result: Messages.Result<Messages.PaymentContextResponse>
@@ -126,79 +92,103 @@ class IngenicoSdkPlugin : FlutterPlugin, Messages.Api {
         val amountOfMoney = AmountOfMoney(amountValue, currencyCode)
         val countryCode = CountryCode.valueOf(arg.countryCode)
         val isRecurring = arg.isRecurring
-
         val paymentContext = PaymentContext(amountOfMoney, countryCode, isRecurring)
-
+        val error = """
+                           
+                            amountValue -> """+ amountValue +"""
+                            amountValueType -> """+ amountValue::class.qualifiedName +"""
+                            currencyCode -> """+ currencyCode +"""
+                            currencyCodeType -> """+ currencyCode::class.qualifiedName +"""
+                           amountOfMoney.amount -> """+ amountOfMoney.amount +"""
+                            amountOfMoney.amountTYPE -> """+ amountOfMoney.amount::class.qualifiedName +"""
+                             amountOfMoney.currencyCode -> """+ amountOfMoney.currencyCode +"""
+                              amountOfMoney.currencyCodeTYPE -> """+ amountOfMoney.currencyCode::class.qualifiedName +"""
+                              amountOfMoney -> """+ amountOfMoney +"""
+                               amountOfMoneyTYPE -> """+ amountOfMoney::class.qualifiedName +"""
+                            countryCode -> """+ countryCode +"""
+                             countryCodeTYPE -> """+ countryCode::class.qualifiedName+"""
+                            isRecurring -> """+ isRecurring +"""
+                             isRecurringTYPE -> """+ isRecurring::class.qualifiedName +"""
+                            paymentContext -> """+ paymentContext.toString() +"""
+                            init
+                        """
+        println(error)
         val listener: BasicPaymentItemsCallListener = object : BasicPaymentItemsCallListener {
             override fun onBasicPaymentItemsCallComplete(basicPaymentItems: BasicPaymentItems) {
-
-                val response = Messages.PaymentContextResponse()
-
+                val response = Messages.PaymentContextResponse.Builder()
                 if (basicPaymentItems is BasicPaymentProducts) {
                     val basicPaymentProducts = basicPaymentItems as BasicPaymentProducts
-                    response.basicPaymentProduct = basicPaymentProducts.basicPaymentProducts.map{
+                    response.setBasicPaymentProduct(basicPaymentProducts.basicPaymentProducts.map{
                         mapBasicPaymentProduct(it)
-                    }
-                    result.success(response)
+                    })
+                    result.success(response.build())
                     return
                 }
-                response.basicPaymentProduct = basicPaymentItems.basicPaymentItems.map{
+                response.setBasicPaymentProduct(basicPaymentItems.basicPaymentItems.map{
                     mapBasicPaymentItem(it)
-                }
-                result.success(response)
-
+                })
+                result.success(response.build())
             }
-
             override fun onBasicPaymentItemsCallError(error: ErrorResponse) {
-                result.error(Error(error.message))
+                val error = """
+                           
+                            amountValue -> """+ amountValue +"""
+                            amountValueType -> """+ amountValue::class.qualifiedName +"""
+                            currencyCode -> """+ currencyCode +"""
+                            currencyCodeType -> """+ currencyCode::class.qualifiedName +"""
+                           amountOfMoney.amount -> """+ amountOfMoney.amount +"""
+                            amountOfMoney.amountTYPE -> """+ amountOfMoney.amount::class.qualifiedName +"""
+                             amountOfMoney.currencyCode -> """+ amountOfMoney.currencyCode +"""
+                              amountOfMoney.currencyCodeTYPE -> """+ amountOfMoney.currencyCode::class.qualifiedName +"""
+                              amountOfMoney -> """+ amountOfMoney +"""
+                               amountOfMoneyTYPE -> """+ amountOfMoney::class.qualifiedName +"""
+                            countryCode -> """+ countryCode +"""
+                             countryCodeTYPE -> """+ countryCode::class.qualifiedName+"""
+                            isRecurring -> """+ isRecurring +"""
+                             isRecurringTYPE -> """+ isRecurring::class.qualifiedName +"""
+                            apiError -> """+ error.apiError +"""
+                            errorMessage -> """+ error.message.toString() +"""
+                            EOF
+                        """
+                result.error(Error(error))
             }
         }
-
         val session = sessionsMap[arg.sessionId] ?: result.error(Error("Cannot find session"))
         if (session is Session) {
             session.getBasicPaymentItems(context, paymentContext, listener, false)
         }
     }
-
     override fun getPaymentProduct(
         arg: Messages.GetPaymentProductRequest,
         result: Messages.Result<Messages.PaymentProduct>
     ) {
-
         val listener: PaymentProductAsyncTask.PaymentProductCallListener = object :
             PaymentProductAsyncTask.PaymentProductCallListener {
             override fun onPaymentProductCallComplete(paymentProduct: PaymentProduct) {
-                val response = Messages.PaymentProduct()
+                val response = Messages.PaymentProduct.Builder()
                 paymentProductMap[paymentProduct.id] = paymentProduct
-                response.fields = paymentProduct.paymentProductFields.map { mapPaymentProductField(it) }
-                response.id = paymentProduct.id
-                response.allowsRecurring = paymentProduct.allowsRecurring()
-                response.allowsTokenization = paymentProduct.allowsTokenization()
-                response.maxAmount = paymentProduct.maxAmount?.toDouble()
-                response.minAmount = paymentProduct.minAmount?.toDouble()
-                response.displayHints = mapDisplayHints(paymentProduct.displayHints)
-                result.success(response)
+                response.setFields(paymentProduct.paymentProductFields.map { mapPaymentProductField(it) })
+                response.setId(paymentProduct.id)
+                response.setAllowsRecurring(paymentProduct.allowsRecurring())
+                response.setAllowsTokenization(paymentProduct.allowsTokenization())
+                response.setMaxAmount(paymentProduct.maxAmount?.toDouble())
+                response.setMinAmount(paymentProduct.minAmount?.toDouble())
+                response.setDisplayHints(mapDisplayHints(paymentProduct.displayHints))
+                result.success(response.build())
             }
-
-
             override fun onPaymentProductCallError(error: ErrorResponse) {
                 result.error(Error(error.message))
             }
         }
-
         val amountValue: Long = arg.amountValue.toLong()
         val currencyCode = CurrencyCode.valueOf(arg.currencyCode)
         val amountOfMoney = AmountOfMoney(amountValue, currencyCode)
         val countryCode = CountryCode.valueOf(arg.countryCode)
         val isRecurring = arg.isRecurring
-
         val paymentContext = PaymentContext(amountOfMoney, countryCode, isRecurring)
-
         val session = sessionsMap[arg.sessionId] ?: throw Error("Cannot find session")
-
         session.getPaymentProduct(context, arg.paymentProductId, paymentContext, listener)
     }
-
     override fun preparePaymentRequest(
         arg: Messages.PaymentRequest,
         result: Messages.Result<Messages.PreparedPaymentRequest>
@@ -207,7 +197,6 @@ class IngenicoSdkPlugin : FlutterPlugin, Messages.Api {
         paymentRequest.paymentProduct = paymentProductMap[arg.paymentProductId]
         paymentRequest.tokenize = arg.tokenize
         arg.values.entries.forEach { e -> paymentRequest.setValue(e.key as String, e.value as String) }
-
         val listener =
             OnPaymentRequestPreparedListener { preparedPaymentRequest ->
                 if (preparedPaymentRequest == null ||
@@ -215,14 +204,12 @@ class IngenicoSdkPlugin : FlutterPlugin, Messages.Api {
                 ) {
                     result.error(Error("Couldn't prepare the payment"))
                 } else {
-                    val response = Messages.PreparedPaymentRequest()
-                    response.encryptedFields = preparedPaymentRequest.encryptedFields
-                    response.encodedClientMetaInfo = preparedPaymentRequest.encodedClientMetaInfo
-
-                    result.success(response)
+                    val response = Messages.PreparedPaymentRequest.Builder()
+                    response.setEncryptedFields(preparedPaymentRequest.encryptedFields)
+                    response.setEncodedClientMetaInfo(preparedPaymentRequest.encodedClientMetaInfo)
+                    result.success(response.build())
                 }
             }
-
         val session = sessionsMap[arg.sessionId] ?: throw Error("Cannot find session")
         session.preparePaymentRequest(paymentRequest, context, listener)
     }

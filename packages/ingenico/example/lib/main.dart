@@ -47,14 +47,14 @@ class _MyAppState extends State<MyApp> {
 
     print("$_session");
 
-    final basicPaymentProducts = await _session.getBasicPaymentProducts(
-      countryCode: "FR",
-      currencyCode: "EUR",
-      isRecurring: false,
-      amountValue: 200000,
-    );
+    // final basicPaymentProducts = await _session.getBasicPaymentProducts(
+    //   countryCode: "FR",
+    //   currencyCode: "EUR",
+    //   isRecurring: false,
+    //   amountValue: 200000,
+    // );
 
-    print(basicPaymentProducts);
+    // print(basicPaymentProducts);
 
     final basicPaymentProduct = await _session.getPaymentProduct(
       paymentProductId: "1",
@@ -67,7 +67,7 @@ class _MyAppState extends State<MyApp> {
     print(basicPaymentProduct);
 
     final preparedPayment = await _session.preparePaymentRequest(
-      paymentProductId: basicPaymentProduct.id!,
+      paymentProductId: basicPaymentProduct.id,
       values: {
         "cardNumber": "4000000000000002",
         "cardholderName": "Guillaume Bernos",
@@ -77,6 +77,7 @@ class _MyAppState extends State<MyApp> {
       currencyCode: 'EUR',
       tokenize: true,
     );
+    print("hello");
 
     print(preparedPayment);
 

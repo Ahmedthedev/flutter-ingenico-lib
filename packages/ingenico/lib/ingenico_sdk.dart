@@ -27,17 +27,17 @@ class IngenicoSdk implements IngenicoPlatform {
     required bool environmentIsProduction,
     required String applicationIdentifier,
   }) async {
-    final sessionRequest = SessionRequest();
-    sessionRequest.clientSessionId = clientSessionId;
-    sessionRequest.customerId = customerId;
-    sessionRequest.clientApiUrl = clientApiUrl;
-    sessionRequest.assetBaseUrl = assetBaseUrl;
-    sessionRequest.environmentIsProduction = environmentIsProduction;
-    sessionRequest.applicationIdentifier = applicationIdentifier;
+    final sessionRequest = SessionRequest(
+        clientSessionId: clientSessionId,
+        customerId: customerId,
+        clientApiUrl: clientApiUrl,
+        assetBaseUrl: assetBaseUrl,
+        environmentIsProduction: environmentIsProduction,
+        applicationIdentifier: applicationIdentifier);
 
     final session = await _api.createClientSession(sessionRequest);
 
-    return Session(session.sessionId!);
+    return Session(session.sessionId);
   }
 }
 
@@ -71,16 +71,16 @@ class Session {
     required String countryCode,
     required bool isRecurring,
   }) async {
-    final paymentContextRequest = PaymentContextRequest();
-    paymentContextRequest.amountValue = amountValue;
-    paymentContextRequest.currencyCode = currencyCode;
-    paymentContextRequest.countryCode = countryCode;
-    paymentContextRequest.isRecurring = isRecurring;
-    paymentContextRequest.sessionId = sessionId;
+    final paymentContextRequest = PaymentContextRequest(
+        amountValue: amountValue,
+        currencyCode: currencyCode,
+        countryCode: countryCode,
+        isRecurring: isRecurring,
+        sessionId: sessionId);
 
     final response = await _api.getBasicPaymentItems(paymentContextRequest);
 
-    return response.basicPaymentProduct!.cast<BasicPaymentProduct>();
+    return response.basicPaymentProduct.cast<BasicPaymentProduct>();
   }
 
   /// Once the [PaymentProduct] have been selected by the user
@@ -94,13 +94,13 @@ class Session {
     required String countryCode,
     required bool isRecurring,
   }) async {
-    final paymentProductRequest = GetPaymentProductRequest();
-    paymentProductRequest.paymentProductId = paymentProductId;
-    paymentProductRequest.amountValue = amountValue;
-    paymentProductRequest.currencyCode = currencyCode;
-    paymentProductRequest.countryCode = countryCode;
-    paymentProductRequest.isRecurring = isRecurring;
-    paymentProductRequest.sessionId = sessionId;
+    final paymentProductRequest = GetPaymentProductRequest(
+        paymentProductId: paymentProductId,
+        amountValue: amountValue,
+        currencyCode: currencyCode,
+        countryCode: countryCode,
+        isRecurring: isRecurring,
+        sessionId: sessionId);
 
     final response = await _api.getPaymentProduct(paymentProductRequest);
 
@@ -117,11 +117,11 @@ class Session {
     required String currencyCode,
     required bool tokenize,
   }) {
-    final request = PaymentRequest();
-    request.paymentProductId = paymentProductId;
-    request.values = values;
-    request.tokenize = tokenize;
-    request.sessionId = sessionId;
+    final request = PaymentRequest(
+        paymentProductId: paymentProductId,
+        values: values,
+        tokenize: tokenize,
+        sessionId: sessionId);
 
     return _api.preparePaymentRequest(request);
   }
