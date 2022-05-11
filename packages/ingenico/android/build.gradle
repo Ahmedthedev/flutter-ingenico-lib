@@ -19,7 +19,7 @@ rootProject.allprojects {
         google()
         jcenter()
         maven {
-            url '/Users/ahmedhachemi/Desktop/ragnarok4/ragnarok/repo'
+            url '../../../repo'
         }
     }
 }
