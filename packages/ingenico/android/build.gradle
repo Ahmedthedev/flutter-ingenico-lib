@@ -18,9 +18,9 @@ rootProject.allprojects {
     repositories {
         google()
         jcenter()
-        maven {
-            url '../../../repo'
-        }
+        /*maven {
+            url '/Users/ahmedhachemi/Desktop/ragnarok4/ragnarok/repo'
+        }*/
     }
 }
 
@@ -49,5 +49,6 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     //implementation(name: 'sdk-client-android-2.0.2', ext: 'aar') 
-    implementation 'com.worldline-solutions:sdk-client-android:2.0.3'
+    //implementation 'com.worldline-solutions:sdk-client-android:2.0.3'
+    implementation fileTree(dir: '../../../repo', include: '**/*.jar')
 }
